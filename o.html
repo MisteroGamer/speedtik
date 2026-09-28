@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>SpeedTik Overlay</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>html,body{margin:0;background:transparent;overflow:hidden}</style>
+</head>
+<body>
+<script>
+// PAGINA PONTE SPEEDTIK - si carica una volta su GitHub e non va piu' toccata.
+// Link per TikTok LIVE Studio:  .../o.html?p=NOME_OVERLAY.html   (opzionale: &port=3000)
+// Resta invisibile finche' SpeedTik non e' aperto, poi apre l'overlay locale.
+(function () {
+  var q = new URLSearchParams(location.search);
+  var page = (q.get('p') || 'toptap.html').replace(/^\/+/, '');
+  if (!/^[\w\-\/.]+$/.test(page) || page.indexOf('..') !== -1) page = 'toptap.html';
+  var port = /^\d{2,5}$/.test(q.get('port') || '') ? q.get('port') : '3000';
+    var target = 'http://localhost:' + port + '/' + page;
+  var done = false;
+
+  function check() {
+    if (done) return;
+    var ws;
+    try { ws = new WebSocket('ws://127.0.0.1:' + port); } catch (e) { return; }
+    ws.onopen = function () {
+      if (done) return;
+      done = true;
+      try { ws.close(); } catch (e) {}
+      location.replace(target);   // SpeedTik e' aperto: vai all'overlay vero
+    };
+    ws.onerror = function () { /* SpeedTik ancora chiuso: riprovo */ };
+  }
+  check();
+  setInterval(check, 1000);
+})();
+</script>
+</body>
+</html>
